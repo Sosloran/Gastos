@@ -1,0 +1,22 @@
+services:
+  - type: redis
+    name: gymquest-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+    region: virginia
+  - type: web
+    name: gastos-cardinal
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/categories
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: gymquest-redis
+          property: connectionString
+      - key: GOOGLE_CLIENT_ID
+        value: 218606258243-mltfvu19m1ptueiluu3q2dn34lt4bu2e.apps.googleusercontent.com

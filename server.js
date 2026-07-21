@@ -5,7 +5,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
-const createAuth = require('../lib/cardinal-auth');
+const createAuth = require('./lib/cardinal-auth');
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 const ROOT = __dirname;
