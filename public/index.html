@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>Gestor de Gastos · Cardinal</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- AUTH: Registro / Inicio de sesión (Cuentas Cardinal) -->
+<div id="auth" class="overlay hidden">
+  <div class="onb-card auth-card">
+    <h2>💰 Gestor de Gastos</h2>
+    <p class="muted small">Tu dinero, organizado. Por <b>Cardinal</b> · usa tu Cuenta Cardinal (la misma de GYMQUEST).</p>
+    <div id="gbtn" class="gbtn-wrap"></div>
+    <button id="authGoogleFallback" class="gbtn hidden">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Continuar con Google
+    </button>
+    <div class="auth-sep"><span>o con tu email</span></div>
+    <div id="authForm">
+      <label id="authNameL">Nombre<input id="authName" type="text" placeholder="Tu nombre" maxlength="20" autocomplete="name"></label>
+      <label>Email<input id="authEmail" type="email" placeholder="tucorreo@gmail.com" autocomplete="email"></label>
+      <label>Contraseña<input id="authPw" type="password" placeholder="••••••" autocomplete="current-password"></label>
+      <p id="authErr" class="auth-err hidden"></p>
+      <button id="authSubmit" class="bigbtn">Crear cuenta Cardinal</button>
+      <p class="auth-toggle"><span id="authToggleTxt">¿Ya tienes cuenta?</span><a href="#" id="authToggle">Inicia sesión</a></p>
+      <p class="auth-toggle"><a href="#" id="authSkip" class="muted small">Entrar sin cuenta (datos solo en este equipo)</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- TUTORIAL -->
+<div id="tutorial" class="overlay hidden">
+  <div class="onb-card tut-card">
+    <h2>👋 ¡Bienvenido!</h2>
+    <p class="small">En 4 pasos dominas el Gestor de Gastos:</p>
+    <ol class="tut-steps">
+      <li><b>💵 Cobro:</b> dime cada cuánto cobras y cuánto. Así calculo cuándo alcanzas tu meta.</li>
+      <li><b>🎯 Meta:</b> fija un objetivo de ahorro (ej. $1.000) y te digo en cuántas semanas/meses lo logras.</li>
+      <li><b>➕ Movimientos:</b> registra gastos e ingresos. Usa etiquetas y reglas para automatizar.</li>
+      <li><b>📊 Paneles:</b> revisa balance, por categoría y evolución mensual. ¡Listo!</li>
+    </ol>
+    <button id="tutDone" class="bigbtn">Empezar 🚀</button>
+  </div>
+</div>
+
+<header>
+  <h1>💰 Gestor de Gastos</h1>
+  <div class="top-actions">
+    <span id="currencyBadge" class="cur">USD</span>
+    <span id="acctName" class="acct"></span>
+  </div>
+  <p class="sub">100% local · gratis · Por Cardinal</p>
+</header>
+
+<main>
+  <!-- Panel de cobro y meta -->
+  <section class="pay" id="payBox">
+    <h2>📅 ¿Cómo cobras y cuál es tu meta?</h2>
+    <div class="row">
+      <select id="payFreq"><option value="semanal">Semanal</option><option value="quincenal">Quincenal</option><option value="mensual">Mensual</option></select>
+      <input id="payAmount" type="number" step="0.01" min="0" placeholder="Monto que cobras">
+    </div>
+    <div class="row">
+      <input id="goalTitle" type="text" placeholder="Nombre de tu meta (ej. Viaje)">
+      <input id="goalTarget" type="number" step="0.01" min="0" placeholder="Meta ahorro ($)">
+    </div>
+    <button id="paySave" class="mini">Guardar y calcular</button>
+    <div id="planView" class="plan"></div>
+  </section>
+
+  <section class="summary">
+    <div class="card income"><span class="label">Ingresos</span><span id="sumIncome" class="value">$0</span></div>
+    <div class="card expense"><span class="label">Gastos</span><span id="sumExpense" class="value">$0</span></div>
+    <div class="card balance"><span class="label">Balance</span><span id="sumBalance" class="value">$0</span></div>
+  </section>
+
+  <section class="goal" id="goalBox">
+    <div class="goal-head"><h2>🎯 Meta de ahorro</h2><button id="editGoal" class="mini">Editar</button></div>
+    <div id="goalView"><div class="goal-bar"><div id="goalFill" class="goal-fill"></div></div><p id="goalText" class="muted">Sin meta fijada.</p></div>
+  </section>
+
+  <section class="filters">
+    <input id="fSearch" type="text" placeholder="🔍 Buscar...">
+    <input id="fFrom" type="date" title="Desde">
+    <input id="fTo" type="date" title="Hasta">
+    <select id="fCategory"><option value="">Todas las categorías</option></select>
+    <select id="fType"><option value="">Todos</option><option value="income">Ingresos</option><option value="expense">Gastos</option></select>
+    <button id="fClear" class="mini">Limpiar</button>
+  </section>
+
+  <section class="form">
+    <h2>Registrar movimiento</h2>
+    <form id="txForm">
+      <div class="row">
+        <select id="type" required><option value="expense">Gasto</option><option value="income">Ingreso</option></select>
+        <input id="amount" type="number" step="0.01" min="0.01" placeholder="Monto" required>
+      </div>
+      <div class="row">
+        <input id="description" type="text" maxlength="80" placeholder="Descripción" required>
+        <select id="category"></select>
+      </div>
+      <div class="row">
+        <input id="date" type="date">
+        <input id="tags" type="text" placeholder="Etiquetas (sep. por comas)" maxlength="60">
+      </div>
+      <div class="row">
+        <button type="submit">➕ Agregar</button>
+        <label class="filebtn">📥 Importar CSV/OFX<input id="fileInput" type="file" accept=".csv,.ofx,.qfx,.txt" hidden></label>
+        <a id="exportBtn" class="filebtn" href="/api/export">📤 Exportar CSV</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="lists">
+    <div class="bycat">
+      <h2>¿En qué se va el dinero?</h2>
+      <div id="catBars"><p class="empty">Sin gastos.</p></div>
+      <div class="budgets">
+        <div class="bh"><h3>Presupuestos mensuales</h3><button id="addBudget" class="mini">+ Añadir</button></div>
+        <div id="budgetList"></div>
+      </div>
+    </div>
+    <div class="history">
+      <h2>Historial</h2>
+      <ul id="txList"><li class="empty">No hay movimientos.</li></ul>
+    </div>
+  </section>
+
+  <section class="monthly">
+    <h2>📈 Evolución mensual</h2>
+    <div id="monthlyChart"><p class="empty">Sin datos para graficar.</p></div>
+  </section>
+
+  <section class="rules">
+    <div class="rh"><h2>⚙️ Reglas automáticas</h2><button id="addRule" class="mini">+ Regla</button></div>
+    <p class="muted small">Si la descripción contiene la palabra clave → se asigna la categoría automáticamente.</p>
+    <ul id="ruleList"></ul>
+  </section>
+
+  <section class="settings">
+    <h2>⚙️ Ajustes</h2>
+    <div id="acctBox" class="secret" style="border-style:solid;border-color:var(--panel2)"></div>
+    <div class="row">
+      <label>Moneda: <input id="setCurrency" type="text" maxlength="5" placeholder="USD" style="flex:0 0 90px"></label>
+      <button id="saveSettings" class="mini">Guardar</button>
+    </div>
+  </section>
+</main>
+
+<footer><p>Hecho por Cardinal · tus apps, una sola cuenta</p></footer>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>window.__GOOGLE_CID__='218606258243-mltfvu19m1ptueiluu3q2dn34lt4bu2e.apps.googleusercontent.com';</script>
+<script src="/app.js"></script>
+</body>
+</html>

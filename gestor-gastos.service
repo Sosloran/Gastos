@@ -1,0 +1,16 @@
+[Unit]
+Description=Cardinal Gestor de Gastos
+After=network.target
+
+[Service]
+Type=simple
+User=vagrant
+WorkingDirectory=/home/vagrant/gastos
+ExecStart=/usr/bin/node /home/vagrant/gastos/server.js
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
